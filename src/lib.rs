@@ -4,11 +4,13 @@ use snafu::{ResultExt, Snafu};
 use syn::DeriveInput;
 
 use crate::attributes::AttributeError;
-use crate::r#enum::{Enum, Variant, extract};
+use crate::r#enum::{Enum, Variant};
+use crate::r#struct::{Field, Struct};
 
 pub mod attributes;
 pub mod r#enum;
 mod prefix_mappings;
+pub mod r#struct;
 
 #[derive(Debug, Snafu)]
 pub enum Error {
@@ -44,11 +46,17 @@ impl Error {
 
 pub enum LinkedDataType<F> {
     Enum(Enum<F>),
+    Struct(Struct<F>),
 }
 
 pub trait TokenGenerator: Sized {
     fn generate_type_tokens(
         linked_data_type: &LinkedDataType<Self>,
+        tokens: &mut TokenStream,
+    );
+
+    fn generate_struct_tokens(
+        r#struct: &Struct<Self>,
         tokens: &mut TokenStream,
     );
 
@@ -58,6 +66,8 @@ pub trait TokenGenerator: Sized {
         variant: &Variant<Self>,
         tokens: &mut TokenStream,
     );
+
+    fn generate_field_tokens(field: &Field<Self>, tokens: &mut TokenStream);
 }
 
 impl<F: TokenGenerator> ToTokens for LinkedDataType<F> {
@@ -76,12 +86,20 @@ impl<F: TokenGenerator> TryFrom<DeriveInput> for LinkedDataType<F> {
         //     .try_into()
         //     .context(InvalidAttributeSnafu)?;
         match derive_input.data {
-            syn::Data::Struct(data_struct) => todo!(),
-            syn::Data::Enum(data_enum) => {
-                extract::<F>(derive_input.attrs, derive_input.ident, data_enum)
-                    .map(LinkedDataType::Enum)
-                    .context(InvalidAttributeSnafu)
-            }
+            syn::Data::Struct(data) => r#struct::extract::<F>(
+                derive_input.attrs,
+                derive_input.ident,
+                data,
+            )
+            .map(LinkedDataType::Struct)
+            .context(InvalidAttributeSnafu),
+            syn::Data::Enum(data) => r#enum::extract::<F>(
+                derive_input.attrs,
+                derive_input.ident,
+                data,
+            )
+            .map(LinkedDataType::Enum)
+            .context(InvalidAttributeSnafu),
             syn::Data::Union(data_union) => todo!(),
         }
     }

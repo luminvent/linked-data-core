@@ -48,8 +48,6 @@ pub enum FieldAttribute {
     Flatten,
     /// Marks the field as an ID field
     Id,
-    /// Shorthand for using rdf:type as the IRI
-    Type,
     /// Marks the field as a graph value
     Graph,
 }

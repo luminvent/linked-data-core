@@ -14,7 +14,7 @@ use crate::prefix_mappings::{Prefix, PrefixMappings};
 #[derive(Debug)]
 pub struct StructAttributes {
     pub prefix_mappings: PrefixMappings,
-    r#type: Option<IriBuf>,
+    pub r#type: Option<IriBuf>,
 }
 
 #[derive(Debug)]

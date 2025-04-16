@@ -7,6 +7,7 @@ mod ast;
 mod parse;
 pub mod r#type;
 pub mod variant;
+pub mod field;
 
 #[derive(Debug, Snafu)]
 pub enum AttributeError {

@@ -2,12 +2,16 @@ use syn::parse::{Parse, ParseStream};
 use syn::{LitStr, Result, Token};
 
 use crate::attributes::ast::{
-    EnumAttribute, PrefixAttribute, PrefixMapping, StructAttribute,
-    TypeAttribute, VariantAttribute,
+    EnumAttribute, FieldAttribute, PrefixAttribute, PrefixMapping,
+    StructAttribute, TypeAttribute, VariantAttribute,
 };
 
 mod kw {
     syn::custom_keyword!(prefix);
+    syn::custom_keyword!(ignore);
+    syn::custom_keyword!(flatten);
+    syn::custom_keyword!(id);
+    syn::custom_keyword!(graph);
 }
 
 impl Parse for StructAttribute {
@@ -43,6 +47,31 @@ impl Parse for VariantAttribute {
     fn parse(input: ParseStream) -> Result<Self> {
         let iri = input.parse::<LitStr>()?;
         Ok(VariantAttribute::Iri(iri))
+    }
+}
+
+impl Parse for FieldAttribute {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let lookahead = input.lookahead1();
+
+        if input.peek(LitStr) {
+            let lit_str = input.parse::<LitStr>()?;
+            Ok(FieldAttribute::Iri(lit_str))
+        } else if lookahead.peek(kw::ignore) {
+            let _: kw::ignore = input.parse()?;
+            Ok(FieldAttribute::Ignore)
+        } else if lookahead.peek(kw::flatten) {
+            let _: kw::flatten = input.parse()?;
+            Ok(FieldAttribute::Flatten)
+        } else if lookahead.peek(kw::id) {
+            let _: kw::id = input.parse()?;
+            Ok(FieldAttribute::Id)
+        } else if lookahead.peek(kw::graph) {
+            let _: kw::graph = input.parse()?;
+            Ok(FieldAttribute::Graph)
+        } else {
+            Err(lookahead.error())
+        }
     }
 }
 
@@ -161,5 +190,48 @@ mod tests {
             typ = "not allowed"
         });
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_field_ignore_parse() {
+        let attr: FieldAttribute = parse_quote! { ignore };
+        match attr {
+            FieldAttribute::Ignore => {},
+            _ => panic!("Expected Ignore variant"),
+        }
+    }
+
+    #[test]
+    fn test_field_iri_parse() {
+        let attr: FieldAttribute = parse_quote! { #IRI };
+        match attr {
+            FieldAttribute::Iri(iri) => assert_eq!(iri.value(), IRI),
+            _ => panic!("Expected Iri variant"),
+        }
+    }
+
+    #[test]
+    fn test_field_flatten_parse() {
+        let attr: FieldAttribute = parse_quote! { flatten };
+        match attr {
+            FieldAttribute::Flatten => {},
+            _ => panic!("Expected Flatten variant"),
+        }
+    }
+
+    #[test]
+    fn test_field_id_and_graph_parse() {
+        let id_attr: FieldAttribute = parse_quote! { id };
+        let graph_attr: FieldAttribute = parse_quote! { graph };
+        
+        match id_attr {
+            FieldAttribute::Id => {},
+            _ => panic!("Expected Id variant"),
+        }
+        
+        match graph_attr {
+            FieldAttribute::Graph => {},
+            _ => panic!("Expected Graph variant"),
+        }
     }
 }
