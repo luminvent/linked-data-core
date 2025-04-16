@@ -1,0 +1,16 @@
+[package]
+name = "linked-data-core"
+description = "Core library for Linked Data crates"
+homepage = "https://github.com/luminvent/linked-data-core"
+repository = "https://github.com/luminvent/linked-data-core"
+version = "0.0.1"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+iref = { version = "3", features = ["serde"] }
+proc-macro-error = "1"
+proc-macro2 = "1"
+quote = "1"
+snafu = "0.8"
+syn = { version = "2", features = ["visit", "extra-traits"] }
