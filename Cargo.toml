@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# TODO Remove darling, somehow it provides debug impl for LitStr
 darling = "0.20.11"
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.94"

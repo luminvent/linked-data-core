@@ -1,7 +1,7 @@
 use syn::LitStr;
 
 /// Represents attribute contents that can be parsed from #[ld(...)] on structs.
-/// 
+///
 /// Possible formats:
 /// - type = "http://example.org/Person"
 /// - prefix("ex" = "http://example.org/")
@@ -27,6 +27,31 @@ pub enum EnumAttribute {
 #[derive(Debug)]
 pub enum VariantAttribute {
     Iri(LitStr),
+}
+
+/// Represents attribute contents that can be parsed from #[ld(...)] on struct fields.
+///
+/// Possible formats:
+/// - ignore
+/// - "http://example.org/property"
+/// - flatten
+/// - id
+/// - type
+/// - graph
+#[derive(Debug)]
+pub enum FieldAttribute {
+    /// Marks the field to be ignored during serialization/deserialization
+    Ignore,
+    /// Specifies the IRI for the field
+    Iri(LitStr),
+    /// Indicates that field's contents should be flattened
+    Flatten,
+    /// Marks the field as an ID field
+    Id,
+    /// Shorthand for using rdf:type as the IRI
+    Type,
+    /// Marks the field as a graph value
+    Graph,
 }
 
 /// Represents a type attribute value.

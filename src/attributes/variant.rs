@@ -9,10 +9,10 @@ use crate::attributes::{
 use crate::prefix_mappings::PrefixMappings;
 
 pub struct VariantAttributes {
-    predicate_path: PredicatePath,
+    pub predicate_path: PredicatePath,
 }
 
-enum PredicatePath {
+pub enum PredicatePath {
     // Represents a path with an intermediate blank node
     // :s <to_blank> _:blank .
     // _:blank <from_blank> :o .

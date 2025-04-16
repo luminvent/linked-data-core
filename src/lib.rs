@@ -1,11 +1,12 @@
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
+use quote::ToTokens;
 use snafu::{ResultExt, Snafu};
 use syn::DeriveInput;
 
 use crate::attributes::AttributeError;
-use crate::r#enum::{Enum, generate};
+use crate::r#enum::{Enum, Variant, extract};
 
-mod attributes;
+pub mod attributes;
 pub mod r#enum;
 mod prefix_mappings;
 
@@ -41,11 +42,31 @@ impl Error {
     }
 }
 
-pub enum LinkedDataType {
-    Enum(Enum),
+pub enum LinkedDataType<F> {
+    Enum(Enum<F>),
 }
 
-impl TryFrom<DeriveInput> for LinkedDataType {
+pub trait TokenGenerator: Sized {
+    fn generate_type_tokens(
+        linked_data_type: &LinkedDataType<Self>,
+        tokens: &mut TokenStream,
+    );
+
+    fn generate_enum_tokens(r#enum: &Enum<Self>, tokens: &mut TokenStream);
+
+    fn generate_variant_tokens(
+        variant: &Variant<Self>,
+        tokens: &mut TokenStream,
+    );
+}
+
+impl<F: TokenGenerator> ToTokens for LinkedDataType<F> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        F::generate_type_tokens(self, tokens)
+    }
+}
+
+impl<F: TokenGenerator> TryFrom<DeriveInput> for LinkedDataType<F> {
     type Error = Error;
 
     fn try_from(derive_input: DeriveInput) -> Result<Self, Self::Error> {
@@ -57,16 +78,12 @@ impl TryFrom<DeriveInput> for LinkedDataType {
         match derive_input.data {
             syn::Data::Struct(data_struct) => todo!(),
             syn::Data::Enum(data_enum) => {
-                generate(derive_input.attrs, derive_input.ident, data_enum)
+                extract::<F>(derive_input.attrs, derive_input.ident, data_enum)
                     .map(LinkedDataType::Enum)
-                    .context(InvalidAttributeSnafu)?;
+                    .context(InvalidAttributeSnafu)
             }
             syn::Data::Union(data_union) => todo!(),
         }
-
-        // Complete the implementation here
-        // For now, returning a placeholder error
-        todo!("Complete the Type construction using prefix_mappings and others")
     }
 }
 
