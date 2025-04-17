@@ -44,9 +44,7 @@ impl<F: TokenGenerator> ToTokens for Enum<F> {
 /// TODO Get the errors out!!!
 impl<'ast, F> Visit<'ast> for Enum<F> {
     fn visit_variant(&mut self, i: &'ast syn::Variant) {
-        let variant =
-            Variant::from_variant(i.clone(), &self.attributes.prefix_mappings)
-                .unwrap();
+        let variant = Variant::from_variant(i.clone(), &self.attributes.prefix_mappings).unwrap();
         self.variants.push(variant);
     }
 }

@@ -21,12 +21,8 @@ pub struct PrefixMappings(HashMap<Prefix, IriBuf>);
 
 impl PrefixMappings {
     /// TODO this sucks!
-    pub fn expand(
-        &self,
-        iri_or_prefixed_name: String,
-    ) -> Result<IriBuf, Error> {
-        let iri = IriBuf::new(iri_or_prefixed_name.clone())
-            .context(InvalidIriSnafu)?;
+    pub fn expand(&self, iri_or_prefixed_name: String) -> Result<IriBuf, Error> {
+        let iri = IriBuf::new(iri_or_prefixed_name.clone()).context(InvalidIriSnafu)?;
 
         if let Some((prefix, name)) = iri_or_prefixed_name.split_once(":") {
             match Prefix::from_str(prefix) {
@@ -42,11 +38,7 @@ impl PrefixMappings {
         }
     }
 
-    pub fn insert_prefix_mapping(
-        &mut self,
-        prefix: Prefix,
-        iri: IriBuf,
-    ) -> Option<IriBuf> {
+    pub fn insert_prefix_mapping(&mut self, prefix: Prefix, iri: IriBuf) -> Option<IriBuf> {
         self.0.insert(prefix, iri)
     }
 
@@ -109,13 +101,8 @@ impl Prefix {
         let contains_colon = |s: &str| s.contains(':');
         let is_empty = |s: &str| s.chars().next().is_none();
         let has_valid_first_char = |c: char| c.is_alphabetic() || c == '_';
-        let is_valid_subsequent_char = |c: char| {
-            c.is_alphabetic()
-                || c.is_digit(10)
-                || c == '_'
-                || c == '-'
-                || c == '.'
-        };
+        let is_valid_subsequent_char =
+            |c: char| c.is_alphabetic() || c.is_ascii_digit() || c == '_' || c == '-' || c == '.';
 
         if contains_colon(prefix) {
             return InvalidPrefixSnafu {
@@ -137,8 +124,7 @@ impl Prefix {
         if !has_valid_first_char(first_char) {
             return InvalidPrefixSnafu {
                 prefix: prefix.to_owned(),
-                reason: "Prefix must start with a letter or underscore"
-                    .to_string(),
+                reason: "Prefix must start with a letter or underscore".to_string(),
             }
             .fail();
         }
@@ -150,10 +136,7 @@ impl Prefix {
             if !is_valid_subsequent_char(c) {
                 return InvalidPrefixSnafu {
                     prefix: prefix.to_owned(),
-                    reason: format!(
-                        "Invalid character '{}' at position {}",
-                        c, i
-                    ),
+                    reason: format!("Invalid character '{}' at position {}", c, i),
                 }
                 .fail();
             }

@@ -40,21 +40,15 @@ impl<F: TokenGenerator> ToTokens for Struct<F> {
 /// TODO Get the errors out!!!
 impl<'ast, F> Visit<'ast> for Struct<F> {
     fn visit_field(&mut self, field: &'ast syn::Field) {
-        let field_obj =
-            Field::from_field(field.clone(), &self.attributes.prefix_mappings)
-                .unwrap();
+        let field_obj = Field::from_field(field.clone(), &self.attributes.prefix_mappings).unwrap();
         self.fields.push(field_obj);
     }
 }
 
 impl<F> Field<F> {
-    fn from_field(
-        field: syn::Field,
-        prefix_mappings: &PrefixMappings,
-    ) -> Result<Self, Error> {
-        let attributes =
-            FieldAttributes::try_from_attrs(field.attrs, prefix_mappings)
-                .context(InvalidAttributeSnafu)?;
+    fn from_field(field: syn::Field, prefix_mappings: &PrefixMappings) -> Result<Self, Error> {
+        let attributes = FieldAttributes::try_from_attrs(field.attrs, prefix_mappings)
+            .context(InvalidAttributeSnafu)?;
 
         Ok(Field {
             attributes,

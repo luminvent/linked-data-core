@@ -1,19 +1,13 @@
 [package]
 name = "linked-data-core"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2024"
 
 [dependencies]
 # TODO Remove darling, somehow it provides debug impl for LitStr
 darling = "0.20.11"
-proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.94"
 quote = "1.0.40"
 syn = { version = "2.0.100", features = ["fold", "visit"] }
 iref = { version = "3.2.2", features = ["serde"] }
-serde_tokenstream = "0.2.2"
-serde = "1.0.219"
-linked-data = "0.1.2"
-linked-data-derive = "0.1.0"
 snafu = "0.8.5"
-curie = "0.1.3"

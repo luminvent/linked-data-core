@@ -34,38 +34,19 @@ pub enum Error {
     // MissingVariantIri(Span),
 }
 
-impl Error {
-    fn span(&self) -> Span {
-        match self {
-            Error::InvalidAttribute { source } => todo!(),
-            Error::MissingField { span } => todo!(),
-            Error::MultipleFields { span } => todo!(),
-        }
-    }
-}
-
 pub enum LinkedDataType<F> {
     Enum(Enum<F>),
     Struct(Struct<F>),
 }
 
 pub trait TokenGenerator: Sized {
-    fn generate_type_tokens(
-        linked_data_type: &LinkedDataType<Self>,
-        tokens: &mut TokenStream,
-    );
+    fn generate_type_tokens(linked_data_type: &LinkedDataType<Self>, tokens: &mut TokenStream);
 
-    fn generate_struct_tokens(
-        r#struct: &Struct<Self>,
-        tokens: &mut TokenStream,
-    );
+    fn generate_struct_tokens(r#struct: &Struct<Self>, tokens: &mut TokenStream);
 
     fn generate_enum_tokens(r#enum: &Enum<Self>, tokens: &mut TokenStream);
 
-    fn generate_variant_tokens(
-        variant: &Variant<Self>,
-        tokens: &mut TokenStream,
-    );
+    fn generate_variant_tokens(variant: &Variant<Self>, tokens: &mut TokenStream);
 
     fn generate_field_tokens(field: &Field<Self>, tokens: &mut TokenStream);
 }
@@ -86,21 +67,17 @@ impl<F: TokenGenerator> TryFrom<DeriveInput> for LinkedDataType<F> {
         //     .try_into()
         //     .context(InvalidAttributeSnafu)?;
         match derive_input.data {
-            syn::Data::Struct(data) => r#struct::extract::<F>(
-                derive_input.attrs,
-                derive_input.ident,
-                data,
-            )
-            .map(LinkedDataType::Struct)
-            .context(InvalidAttributeSnafu),
-            syn::Data::Enum(data) => r#enum::extract::<F>(
-                derive_input.attrs,
-                derive_input.ident,
-                data,
-            )
-            .map(LinkedDataType::Enum)
-            .context(InvalidAttributeSnafu),
-            syn::Data::Union(data_union) => todo!(),
+            syn::Data::Struct(data) => {
+                r#struct::extract::<F>(derive_input.attrs, derive_input.ident, data)
+                    .map(LinkedDataType::Struct)
+                    .context(InvalidAttributeSnafu)
+            }
+            syn::Data::Enum(data) => {
+                r#enum::extract::<F>(derive_input.attrs, derive_input.ident, data)
+                    .map(LinkedDataType::Enum)
+                    .context(InvalidAttributeSnafu)
+            }
+            syn::Data::Union(_) => todo!(),
         }
     }
 }

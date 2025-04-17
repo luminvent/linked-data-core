@@ -6,8 +6,7 @@ use syn::Attribute;
 
 use crate::attributes::ast::{EnumAttribute, PrefixAttribute, StructAttribute};
 use crate::attributes::{
-    AttributeError, InvalidExpansionSnafu, InvalidPrefixSnafu, parse_iri,
-    parse_ld_attributes,
+    AttributeError, InvalidExpansionSnafu, InvalidPrefixSnafu, parse_iri, parse_ld_attributes,
 };
 use crate::prefix_mappings::{Prefix, PrefixMappings};
 
@@ -30,9 +29,7 @@ impl TryFrom<Vec<Attribute>> for StructAttributes {
         let prefix_mappings = parse_ld_attributes(&attrs)?
             .into_iter()
             .filter_map(|attr| match attr {
-                StructAttribute::Prefix(prefix) => {
-                    Some(PrefixMappings::try_from(prefix))
-                }
+                StructAttribute::Prefix(prefix) => Some(PrefixMappings::try_from(prefix)),
                 StructAttribute::Type(type_attr) => {
                     type_attrs.push(type_attr);
                     None
@@ -71,9 +68,7 @@ impl TryFrom<Vec<Attribute>> for EnumAttributes {
         let prefix_mappings = parse_ld_attributes(&attrs)?
             .into_iter()
             .map(|attr| match attr {
-                EnumAttribute::Prefix(prefix_attr) => {
-                    PrefixMappings::try_from(prefix_attr)
-                }
+                EnumAttribute::Prefix(prefix_attr) => PrefixMappings::try_from(prefix_attr),
             })
             .collect::<Result<PrefixMappings, AttributeError>>()?;
 
@@ -88,11 +83,9 @@ impl TryFrom<PrefixAttribute> for PrefixMappings {
         let lit_iri = attr.mapping.iri;
         let iri = parse_iri(lit_iri)?;
         let lit_prefix = attr.mapping.prefix;
-        let prefix = Prefix::from_str(&lit_prefix.value()).context(
-            InvalidPrefixSnafu {
-                span: lit_prefix.span(),
-            },
-        )?;
+        let prefix = Prefix::from_str(&lit_prefix.value()).context(InvalidPrefixSnafu {
+            span: lit_prefix.span(),
+        })?;
 
         let mut prefix_mappings = PrefixMappings::default();
         prefix_mappings.insert_prefix_mapping(prefix, iri);
@@ -126,11 +119,9 @@ mod tests {
     fn test_prefix_mappings_from_vec_prefix_attribute() {
         let prefix_attr1: PrefixAttribute =
             parse_quote! { prefix(#TEST_PREFIX = #TEST_PREFIX_IRI) };
-        let prefix_attr2: PrefixAttribute =
-            parse_quote! { prefix("foo" = "http://foo.org/") };
+        let prefix_attr2: PrefixAttribute = parse_quote! { prefix("foo" = "http://foo.org/") };
 
-        let prefix_mappings =
-            PrefixMappings::try_from(vec![prefix_attr1, prefix_attr2]).unwrap();
+        let prefix_mappings = PrefixMappings::try_from(vec![prefix_attr1, prefix_attr2]).unwrap();
 
         let prefix1 = Prefix::from_str(TEST_PREFIX).unwrap();
         let prefix2 = Prefix::from_str("foo").unwrap();
@@ -200,7 +191,8 @@ mod tests {
 
     #[test]
     fn test_invalid_iri_in_prefix_attribute() {
-        let prefix_attr: PrefixAttribute = parse_quote! { prefix(#TEST_PREFIX = "not a valid iri with spaces") };
+        let prefix_attr: PrefixAttribute =
+            parse_quote! { prefix(#TEST_PREFIX = "not a valid iri with spaces") };
 
         let result = PrefixMappings::try_from(prefix_attr);
         assert!(result.is_err());

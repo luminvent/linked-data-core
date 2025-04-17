@@ -3,9 +3,7 @@ use snafu::ResultExt;
 use syn::Attribute;
 
 use crate::attributes::ast::VariantAttribute;
-use crate::attributes::{
-    AttributeError, InvalidExpansionSnafu, parse_ld_attributes,
-};
+use crate::attributes::{AttributeError, InvalidExpansionSnafu, parse_ld_attributes};
 use crate::prefix_mappings::PrefixMappings;
 
 pub struct VariantAttributes {
@@ -32,33 +30,29 @@ impl VariantAttributes {
         outer_attrs: Vec<Attribute>,
         prefix_mappings: &PrefixMappings,
     ) -> Result<Self, AttributeError> {
-        let inner_attrs: Vec<VariantAttribute> =
-            parse_ld_attributes(&inner_attrs)?;
-        let outer_attrs: Vec<VariantAttribute> =
-            parse_ld_attributes(&outer_attrs)?;
+        let inner_attrs: Vec<VariantAttribute> = parse_ld_attributes(&inner_attrs)?;
+        let outer_attrs: Vec<VariantAttribute> = parse_ld_attributes(&outer_attrs)?;
 
-        let unpack_variant_attrs = |attrs: &[VariantAttribute]| -> Result<
-            Option<IriBuf>,
-            AttributeError,
-        > {
-            if let Some(VariantAttribute::Iri(iri)) = attrs.get(1) {
-                Err(AttributeError::MultipleIris { span: iri.span() })
-            } else {
-                attrs
-                    .first()
-                    .map(|variant_attr| match variant_attr {
-                        VariantAttribute::Iri(lit_str) => lit_str,
-                    })
-                    .map(|lit_str| {
-                        prefix_mappings.expand(lit_str.value()).context(
-                            InvalidExpansionSnafu {
-                                span: lit_str.span(),
-                            },
-                        )
-                    })
-                    .transpose()
-            }
-        };
+        let unpack_variant_attrs =
+            |attrs: &[VariantAttribute]| -> Result<Option<IriBuf>, AttributeError> {
+                if let Some(VariantAttribute::Iri(iri)) = attrs.get(1) {
+                    Err(AttributeError::MultipleIris { span: iri.span() })
+                } else {
+                    attrs
+                        .first()
+                        .map(|variant_attr| match variant_attr {
+                            VariantAttribute::Iri(lit_str) => lit_str,
+                        })
+                        .map(|lit_str| {
+                            prefix_mappings
+                                .expand(lit_str.value())
+                                .context(InvalidExpansionSnafu {
+                                    span: lit_str.span(),
+                                })
+                        })
+                        .transpose()
+                }
+            };
 
         let inner_attr = unpack_variant_attrs(&inner_attrs)?;
         let outer_attr = unpack_variant_attrs(&outer_attrs)?;

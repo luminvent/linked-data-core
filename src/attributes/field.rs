@@ -3,9 +3,7 @@ use snafu::ResultExt;
 use syn::Attribute;
 
 use crate::attributes::ast::FieldAttribute;
-use crate::attributes::{
-    AttributeError, InvalidExpansionSnafu, parse_iri, parse_ld_attributes,
-};
+use crate::attributes::{AttributeError, InvalidExpansionSnafu, parse_iri, parse_ld_attributes};
 use crate::prefix_mappings::PrefixMappings;
 
 #[derive(Debug, Default)]
@@ -38,12 +36,13 @@ impl FieldAttributes {
                         });
                     }
                     // TODO function for parsing and expanding
-                    let iri = parse_iri(lit_str.clone())?;
-                    let iri = prefix_mappings.expand(lit_str.value()).context(
-                        InvalidExpansionSnafu {
-                            span: lit_str.span(),
-                        },
-                    )?;
+                    let _iri = parse_iri(lit_str.clone())?;
+                    let iri =
+                        prefix_mappings
+                            .expand(lit_str.value())
+                            .context(InvalidExpansionSnafu {
+                                span: lit_str.span(),
+                            })?;
                     attributes.predicate = Some(iri);
                 }
                 FieldAttribute::Flatten => {

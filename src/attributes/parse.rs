@@ -2,8 +2,8 @@ use syn::parse::{Parse, ParseStream};
 use syn::{LitStr, Result, Token};
 
 use crate::attributes::ast::{
-    EnumAttribute, FieldAttribute, PrefixAttribute, PrefixMapping,
-    StructAttribute, TypeAttribute, VariantAttribute,
+    EnumAttribute, FieldAttribute, PrefixAttribute, PrefixMapping, StructAttribute, TypeAttribute,
+    VariantAttribute,
 };
 
 mod kw {
@@ -196,7 +196,7 @@ mod tests {
     fn test_field_ignore_parse() {
         let attr: FieldAttribute = parse_quote! { ignore };
         match attr {
-            FieldAttribute::Ignore => {},
+            FieldAttribute::Ignore => {}
             _ => panic!("Expected Ignore variant"),
         }
     }
@@ -214,7 +214,7 @@ mod tests {
     fn test_field_flatten_parse() {
         let attr: FieldAttribute = parse_quote! { flatten };
         match attr {
-            FieldAttribute::Flatten => {},
+            FieldAttribute::Flatten => {}
             _ => panic!("Expected Flatten variant"),
         }
     }
@@ -223,14 +223,14 @@ mod tests {
     fn test_field_id_and_graph_parse() {
         let id_attr: FieldAttribute = parse_quote! { id };
         let graph_attr: FieldAttribute = parse_quote! { graph };
-        
+
         match id_attr {
-            FieldAttribute::Id => {},
+            FieldAttribute::Id => {}
             _ => panic!("Expected Id variant"),
         }
-        
+
         match graph_attr {
-            FieldAttribute::Graph => {},
+            FieldAttribute::Graph => {}
             _ => panic!("Expected Graph variant"),
         }
     }

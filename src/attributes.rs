@@ -4,10 +4,10 @@ use snafu::{ResultExt, Snafu};
 use syn::{Attribute, LitStr};
 
 mod ast;
+pub mod field;
 mod parse;
 pub mod r#type;
 pub mod variant;
-pub mod field;
 
 #[derive(Debug, Snafu)]
 pub enum AttributeError {
