@@ -3,7 +3,7 @@ name = "linked-data-core"
 description = "Core library for Linked Data crates"
 homepage = "https://github.com/luminvent/linked-data-core"
 repository = "https://github.com/luminvent/linked-data-core"
-version = "0.0.1"
+version = "0.1.0"
 edition = "2024"
 license = "MIT"
 
