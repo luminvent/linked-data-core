@@ -16,7 +16,7 @@ pub enum Error {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Prefix(String);
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct PrefixMappings(HashMap<Prefix, IriBuf>);
 
 impl PrefixMappings {

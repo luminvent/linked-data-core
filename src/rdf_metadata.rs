@@ -35,6 +35,7 @@ pub struct RdfStruct<G> {
   pub fields: Vec<RdfField<G>>,
 }
 
+#[derive(Debug)]
 pub struct RdfField<G> {
   attributes: RdfFieldAttributes,
   pub ty: syn::Type,
@@ -124,6 +125,10 @@ impl<F> RdfVariant<F> {
 impl<G> RdfStruct<G> {
   pub fn type_iri(&self) -> Option<&IriBuf> {
     self.attributes.r#type.as_ref()
+  }
+
+  pub fn prefix_mappings(&self) -> &PrefixMappings {
+    &self.attributes.prefix_mappings
   }
 }
 
