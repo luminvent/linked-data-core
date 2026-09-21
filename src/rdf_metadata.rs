@@ -26,7 +26,12 @@ pub struct RdfEnum<G> {
 pub struct RdfVariant<G> {
   attributes: RdfVariantAttributes,
   pub index: usize,
-  pub ty: syn::Type,
+  /// The variant's single field type, or `None` for a unit variant.
+  ///
+  /// A unit variant marks the enum as a closed list of RDF resources (see
+  /// [`RdfEnum::is_closed_list`]): the variant itself, rather than a wrapped value, is the leaf
+  /// RDF term, identified by its own IRI.
+  pub ty: Option<syn::Type>,
   _generator: PhantomData<G>,
 }
 
@@ -73,12 +78,35 @@ impl<G: TokenGenerator> RdfType<G> {
           variants: vec![],
         };
         r#enum.visit_data_enum(&data);
+
+        let has_unit_variant = r#enum.variants.iter().any(|variant| variant.ty.is_none());
+        let has_data_variant = r#enum.variants.iter().any(|variant| variant.ty.is_some());
+        if has_unit_variant && has_data_variant {
+          return Err(Error::MixedVariantKinds {
+            span: data.enum_token.span(),
+          });
+        }
+
         Ok(RdfType::Enum(r#enum))
       }
       syn::Data::Union(data_union) => Err(Error::UnionType {
         span: data_union.union_token.span(),
       }),
     }
+  }
+}
+
+impl<G> RdfEnum<G> {
+  /// A closed list of RDF resources: every variant is a unit variant, and each one is a leaf
+  /// term identified by its own IRI (e.g. a controlled vocabulary), rather than a tagged union
+  /// wrapping heterogeneous inner values. `try_from_derive` rejects mixing unit and non-unit
+  /// variants, so checking the first variant reflects every variant.
+  pub fn is_closed_list(&self) -> bool {
+    self.variants.first().is_none_or(RdfVariant::is_unit)
+  }
+
+  pub fn prefix_mappings(&self) -> &PrefixMappings {
+    &self.attributes.prefix_mappings
   }
 }
 
@@ -100,32 +128,40 @@ impl<F> RdfVariant<F> {
     prefix_mappings: &PrefixMappings,
   ) -> Result<Self, Error> {
     let mut fields = variant.fields.iter();
+    let field = fields.next();
 
-    let Some(field) = fields.next() else {
-      return Err(Error::UnitVariant {
-        span: variant.span(),
+    if let Some(extra_field) = fields.next() {
+      return Err(Error::StructVariant {
+        span: extra_field.span(),
       });
-    };
-
-    if let Some(field) = fields.next() {
-      return Err(Error::StructVariant { span: field.span() });
     }
+
+    let (inner_attrs, ty) = match field {
+      Some(field) => (field.attrs.clone(), Some(field.ty.clone())),
+      None => (vec![], None),
+    };
 
     Ok(RdfVariant {
       attributes: RdfVariantAttributes::try_from_attrs(
         &variant,
-        field.attrs.clone(),
+        inner_attrs,
         variant.attrs.clone(),
         prefix_mappings,
       )?,
       index,
-      ty: field.ty.clone(),
+      ty,
       _generator: PhantomData,
     })
   }
 
   pub fn predicate_path(&self) -> &PredicatePath {
     &self.attributes.predicate_path
+  }
+
+  /// `true` for a unit variant: a leaf member of a closed list of RDF resources, identified by
+  /// its own IRI rather than wrapping a value. See [`RdfEnum::is_closed_list`].
+  pub fn is_unit(&self) -> bool {
+    self.ty.is_none()
   }
 }
 

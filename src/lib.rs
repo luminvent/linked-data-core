@@ -56,11 +56,14 @@ pub enum Error {
   #[snafu(display("union types are not supported"))]
   UnionType { span: Span },
 
-  #[snafu(display("unit variants are not supported"))]
-  UnitVariant { span: Span },
-
   #[snafu(display("struct variants are not supported"))]
   StructVariant { span: Span },
+
+  #[snafu(display(
+    "an enum must either have only unit variants (a closed list of RDF resources) or only \
+    single-field variants (a tagged union); mixing both is not supported"
+  ))]
+  MixedVariantKinds { span: Span },
 
   #[snafu(transparent)]
   MalformedAttribute { source: syn::Error },
@@ -91,8 +94,8 @@ impl Error {
   fn span(&self) -> Span {
     match self {
       Error::UnionType { span } => *span,
-      Error::UnitVariant { span } => *span,
       Error::StructVariant { span } => *span,
+      Error::MixedVariantKinds { span } => *span,
       Error::MalformedAttribute { source } => source.span(),
       Error::InvalidIri { span, .. } => *span,
       Error::InvalidMapping { span, .. } => *span,
