@@ -76,7 +76,7 @@ pub enum Error {
 
   #[snafu(display("{source}"))]
   InvalidIri {
-    source: iref::InvalidIri<String>,
+    source: oxiri::IriParseError,
     span: Span,
   },
 

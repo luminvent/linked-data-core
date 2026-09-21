@@ -1,4 +1,4 @@
-use iref::IriBuf;
+use oxiri::Iri;
 use snafu::ResultExt;
 
 use crate::attributes::ast::FieldAttribute;
@@ -11,7 +11,7 @@ pub struct RdfFieldAttributes {
   pub flatten: bool,
   pub is_graph: bool,
   pub ignore: bool,
-  pub predicate: Option<IriBuf>,
+  pub predicate: Option<Iri<String>>,
   pub is_id: bool,
 }
 

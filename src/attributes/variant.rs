@@ -1,4 +1,4 @@
-use iref::IriBuf;
+use oxiri::Iri;
 use snafu::ResultExt;
 use syn::spanned::Spanned;
 
@@ -16,13 +16,13 @@ pub enum PredicatePath {
   // :s <to_blank> _:blank .
   // _:blank <from_blank> :o .
   ChainedPath {
-    to_blank: IriBuf,
-    from_blank: IriBuf,
+    to_blank: Iri<String>,
+    from_blank: Iri<String>,
   },
 
   // For the direct case:
   // :s :predicate :o .
-  Predicate(IriBuf),
+  Predicate(Iri<String>),
 }
 
 impl RdfVariantAttributes {
@@ -35,7 +35,7 @@ impl RdfVariantAttributes {
     let inner_attrs: Vec<VariantAttribute> = parse_ld_attributes(&inner_attrs)?;
     let outer_attrs: Vec<VariantAttribute> = parse_ld_attributes(&outer_attrs)?;
 
-    let unpack_variant_attrs = |attrs: &[VariantAttribute]| -> Result<Option<IriBuf>, Error> {
+    let unpack_variant_attrs = |attrs: &[VariantAttribute]| -> Result<Option<Iri<String>>, Error> {
       if let Some(VariantAttribute::Iri(iri)) = attrs.get(1) {
         Err(Error::MultipleIris { span: iri.span() })
       } else {

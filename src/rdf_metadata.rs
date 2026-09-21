@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use iref::IriBuf;
+use oxiri::Iri;
 use proc_macro_error::abort;
 use syn::DeriveInput;
 use syn::spanned::Spanned;
@@ -25,6 +25,7 @@ pub struct RdfEnum<G> {
 
 pub struct RdfVariant<G> {
   attributes: RdfVariantAttributes,
+  pub index: usize,
   pub ty: syn::Type,
   _generator: PhantomData<G>,
 }
@@ -85,6 +86,7 @@ impl<'ast, F> Visit<'ast> for RdfEnum<F> {
   fn visit_variant(&mut self, variant: &'ast syn::Variant) {
     let variant = unwrap_or_abort(RdfVariant::from_variant(
       variant.clone(),
+      self.variants.len(),
       &self.attributes.prefix_mappings,
     ));
     self.variants.push(variant);
@@ -92,7 +94,11 @@ impl<'ast, F> Visit<'ast> for RdfEnum<F> {
 }
 
 impl<F> RdfVariant<F> {
-  fn from_variant(variant: syn::Variant, prefix_mappings: &PrefixMappings) -> Result<Self, Error> {
+  fn from_variant(
+    variant: syn::Variant,
+    index: usize,
+    prefix_mappings: &PrefixMappings,
+  ) -> Result<Self, Error> {
     let mut fields = variant.fields.iter();
 
     let Some(field) = fields.next() else {
@@ -112,6 +118,7 @@ impl<F> RdfVariant<F> {
         variant.attrs.clone(),
         prefix_mappings,
       )?,
+      index,
       ty: field.ty.clone(),
       _generator: PhantomData,
     })
@@ -123,7 +130,7 @@ impl<F> RdfVariant<F> {
 }
 
 impl<G> RdfStruct<G> {
-  pub fn type_iri(&self) -> Option<&IriBuf> {
+  pub fn type_iri(&self) -> Option<&Iri<String>> {
     self.attributes.r#type.as_ref()
   }
 
@@ -165,7 +172,7 @@ impl<F> RdfField<F> {
     self.attributes.ignore
   }
 
-  pub fn predicate(&self) -> Option<&IriBuf> {
+  pub fn predicate(&self) -> Option<&Iri<String>> {
     self.attributes.predicate.as_ref()
   }
 

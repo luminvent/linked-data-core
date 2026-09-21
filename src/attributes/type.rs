@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use iref::IriBuf;
+use oxiri::Iri;
 use snafu::ResultExt;
 
 use crate::attributes::ast::{EnumAttribute, PrefixAttribute, StructAttribute};
@@ -11,7 +11,7 @@ use crate::{Error, InvalidMappingSnafu};
 #[derive(Debug)]
 pub struct RdfStructAttributes {
   pub prefix_mappings: PrefixMappings,
-  pub r#type: Option<IriBuf>,
+  pub r#type: Option<Iri<String>>,
 }
 
 #[derive(Debug)]

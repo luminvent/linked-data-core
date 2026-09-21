@@ -1,4 +1,4 @@
-use iref::IriBuf;
+use oxiri::Iri;
 use snafu::ResultExt;
 use syn::{Attribute, LitStr};
 
@@ -20,8 +20,8 @@ fn parse_ld_attributes<T: syn::parse::Parse>(attrs: &[Attribute]) -> Result<Vec<
   )
 }
 
-fn parse_iri(lit_iri: LitStr) -> Result<IriBuf, Error> {
-  IriBuf::new(lit_iri.value()).context(InvalidIriSnafu {
+fn parse_iri(lit_iri: LitStr) -> Result<Iri<String>, Error> {
+  Iri::parse(lit_iri.value()).context(InvalidIriSnafu {
     span: lit_iri.span(),
   })
 }
