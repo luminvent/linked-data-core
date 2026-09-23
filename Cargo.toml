@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 oxiri = { version = "0.3", features = ["serde"] }
-proc-macro-error = "1.0.4"
+proc-macro-error3 = "3.1.1"
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
 snafu = "0.9.2"

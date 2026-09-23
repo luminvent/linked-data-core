@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use oxiri::Iri;
-use proc_macro_error::abort;
+use proc_macro_error3::abort;
 use syn::DeriveInput;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
